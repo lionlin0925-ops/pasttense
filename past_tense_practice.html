@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>過去式練習 — 動詞三態</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F4F1EC;
+  --card:#FFFFFF;
+  --accent:#2D5BE3;
+  --accent2:#E84545;
+  --green:#1A9E6E;
+  --amber:#D4820A;
+  --text:#1A1A1A;
+  --muted:#7A7A7A;
+  --border:#D8D4CC;
+  --radius:12px;
+}
+body{
+  font-family:'Noto Sans TC',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  padding:24px 16px 48px;
+}
+.mono{font-family:'Space Mono',monospace}
+
+/* Header */
+.app-header{
+  max-width:640px;margin:0 auto 28px;
+  display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:8px;
+}
+.app-title{font-size:22px;font-weight:700;letter-spacing:-.5px}
+.app-title span{color:var(--accent)}
+.score-strip{
+  display:flex;gap:8px;font-size:13px;font-family:'Space Mono',monospace;
+}
+.sc{padding:4px 10px;border-radius:6px;font-weight:700}
+.sc-ok{background:#DCFAEE;color:#0D6E42}
+.sc-bad{background:#FDDEDE;color:#A01A1A}
+
+/* Tabs */
+.tabs{
+  max-width:640px;margin:0 auto 20px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:6px;
+}
+.tab{
+  padding:10px 4px;font-size:13px;font-weight:500;
+  border:1.5px solid var(--border);border-radius:var(--radius);
+  background:var(--card);color:var(--muted);
+  cursor:pointer;transition:all .18s;text-align:center;
+  font-family:'Noto Sans TC',sans-serif;
+}
+.tab:hover{border-color:var(--accent);color:var(--accent)}
+.tab.active{
+  background:var(--accent);color:#fff;border-color:var(--accent);
+}
+
+/* Progress */
+.prog-wrap{max-width:640px;margin:0 auto 20px}
+.prog-track{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .35s cubic-bezier(.4,0,.2,1)}
+.prog-label{font-size:12px;color:var(--muted);margin-top:6px;font-family:'Space Mono',monospace}
+
+/* Card */
+.card{
+  max-width:640px;margin:0 auto 16px;
+  background:var(--card);border:1.5px solid var(--border);
+  border-radius:var(--radius);padding:24px;
+}
+.q-type{
+  font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--accent);
+  margin-bottom:6px;text-transform:uppercase;font-family:'Space Mono',monospace;
+}
+.q-hint{
+  font-size:13px;color:var(--muted);margin-bottom:14px;
+  background:#F8F6F0;padding:8px 12px;border-radius:8px;border-left:3px solid var(--border);
+}
+.q-hint b{color:var(--text)}
+.q-text{font-size:16px;line-height:1.7;margin-bottom:18px;font-weight:500}
+.q-text u{text-decoration-color:var(--accent2);text-decoration-thickness:2px}
+
+/* Input group */
+.input-group{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.input-label{font-size:13px;color:var(--muted);min-width:80px}
+.inp{
+  flex:1;min-width:140px;font-size:15px;padding:10px 14px;
+  border:1.5px solid var(--border);border-radius:9px;
+  background:#FAFAF8;color:var(--text);outline:none;
+  font-family:'Noto Sans TC',sans-serif;
+  transition:border-color .15s,box-shadow .15s;
+}
+.inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,91,227,.12)}
+.inp.correct{border-color:var(--green);background:#F0FBF6;color:#0D6E42}
+.inp.wrong{border-color:var(--accent2);background:#FEF3F3}
+.inp.revealed{border-color:var(--amber);background:#FEF9ED;color:var(--amber)}
+.inp[readonly]{opacity:.45;cursor:default;background:#F5F4F0}
+
+/* YN buttons */
+.yn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.yn-btn{
+  padding:11px;font-size:14px;font-weight:500;
+  border:1.5px solid var(--border);border-radius:9px;
+  background:#FAFAF8;color:var(--text);cursor:pointer;
+  transition:all .15s;font-family:'Noto Sans TC',sans-serif;
+}
+.yn-btn:hover{border-color:var(--accent);color:var(--accent)}
+.yn-btn.sel-yes{border-color:var(--green);background:#F0FBF6;color:#0D6E42}
+.yn-btn.sel-no{border-color:var(--accent2);background:#FEF3F3;color:#A01A1A}
+.yn-btn.ok{border-color:var(--green);background:#DCF5EA;color:#0A5A35;font-weight:700}
+.yn-btn.err{border-color:var(--accent2);background:#FDDEDE;color:#A01A1A}
+
+/* Feedback */
+.feedback{
+  font-size:14px;min-height:22px;margin:8px 0;padding:0 2px;
+  border-radius:6px;
+}
+.feedback.ok{color:#0A5A35}
+.feedback.err{color:#A01A1A}
+.feedback.rev{color:var(--amber)}
+
+/* Action buttons */
+.actions{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.btn{
+  padding:9px 20px;font-size:14px;font-weight:500;
+  border:1.5px solid var(--border);border-radius:9px;
+  background:transparent;color:var(--text);cursor:pointer;
+  transition:all .15s;font-family:'Noto Sans TC',sans-serif;
+}
+.btn:hover{background:#F0EEE8}
+.btn-primary{border-color:var(--accent);color:var(--accent)}
+.btn-primary:hover{background:#EEF2FD}
+.btn-ghost{color:var(--muted)}
+.btn-ghost:hover{color:var(--text);background:#F0EEE8}
+
+/* Complete */
+.complete{
+  max-width:640px;margin:0 auto;
+  background:var(--card);border:1.5px solid var(--border);
+  border-radius:var(--radius);padding:40px 24px;text-align:center;
+}
+.big-score{font-size:52px;font-weight:700;font-family:'Space Mono',monospace;color:var(--accent);margin-bottom:4px}
+.result-msg{font-size:16px;color:var(--muted);margin-bottom:24px}
+.btn-restart{
+  padding:12px 32px;font-size:15px;font-weight:700;
+  border:1.5px solid var(--accent);border-radius:9px;
+  background:var(--accent);color:#fff;cursor:pointer;
+  font-family:'Noto Sans TC',sans-serif;
+  transition:opacity .15s;
+}
+.btn-restart:hover{opacity:.88}
+
+@media(max-width:480px){
+  .card{padding:18px}
+  .input-label{min-width:64px;font-size:12px}
+  .big-score{font-size:40px}
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="app-title">過去式<span>練習</span></div>
+  <div class="score-strip">
+    <div class="sc sc-ok" id="scOk">✓ 0</div>
+    <div class="sc sc-bad" id="scBad">✗ 0</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchMode('form3')">三態填空</button>
+  <button class="tab" onclick="switchMode('yesno')">Yes / No 問句</button>
+  <button class="tab" onclick="switchMode('wh')">WH 問句</button>
+</div>
+
+<div class="prog-wrap">
+  <div class="prog-track"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+  <div class="prog-label" id="progLabel">第 1 / 10 題</div>
+</div>
+
+<div id="content"></div>
+
+<script>
+const VERBS=[
+  ["cost","cost","cost","花費"],["cut","cut","cut","切割"],["hit","hit","hit","碰撞"],
+  ["hurt","hurt","hurt","傷害"],["let","let","let","讓"],["put","put","put","放置"],
+  ["read","read","read","閱讀"],["set","set","set","擺放"],["shut","shut","shut","關閉"],
+  ["spread","spread","spread","傳開"],["come","came","come","來"],["run","ran","run","跑步"],
+  ["become","became","become","變成"],["buy","bought","bought","買"],
+  ["catch","caught","caught","抓到"],["feel","felt","felt","感覺"],
+  ["find","found","found","找到"],["get","got","got","得到"],
+  ["have","had","had","有/吃"],["hear","heard","heard","聽到"],
+  ["keep","kept","kept","保持"],["leave","left","left","離開"],
+  ["make","made","made","製造"],["meet","met","met","遇見"],
+  ["pay","paid","paid","付費"],["say","said","said","說"],
+  ["sell","sold","sold","賣"],["send","sent","sent","寄"],
+  ["sit","sat","sat","坐"],["sleep","slept","slept","睡覺"],
+  ["spend","spent","spent","花費/花時間"],["stand","stood","stood","起立"],
+  ["teach","taught","taught","教導"],["tell","told","told","告訴"],
+  ["think","thought","thought","思考"],["win","won","won","贏"],
+  ["begin","began","begun","開始"],["drink","drank","drunk","喝"],
+  ["sing","sang","sung","唱歌"],["swim","swam","swum","游泳"],
+  ["wear","wore","worn","穿"],["blow","blew","blown","吹"],
+  ["draw","drew","drawn","畫"],["fly","flew","flown","飛"],
+  ["grow","grew","grown","成長"],["know","knew","known","知道"],
+  ["throw","threw","thrown","丟"],["do","did","done","做"],
+  ["go","went","gone","去"],["break","broke","broken","打破"],
+  ["choose","chose","chosen","選擇"],["eat","ate","eaten","吃"],
+  ["fall","fell","fallen","掉落"],["give","gave","given","給"],
+  ["see","saw","seen","看"],["speak","spoke","spoken","說話"],
+  ["take","took","taken","拿/搭乘"],["write","wrote","written","寫"],
+  ["drive","drove","driven","開車"],["ride","rode","ridden","騎"],
+  ["build","built","built","建造"],["bring","brought","brought","帶來"],
+  ["lose","lost","lost","失去"],["feed","fed","fed","餵"],
+  ["fight","fought","fought","打架"],["hold","held","held","握"],
+  ["lead","led","led","領導"],["light","lit","lit","點燃"],
+  ["mean","meant","meant","意指"],["shine","shone","shone","閃光"],
+  ["shoot","shot","shot","投射"],["understand","understood","understood","了解"],
+  ["hide","hid","hidden","藏"],["wake","woke","woken","醒來"],
+  ["steal","stole","stolen","偷"],["freeze","froze","frozen","凍結"]
+];
+
+const YN_SUBJ=[
+  {s:"She",dp:"she",dn:"she didn't"},
+  {s:"He",dp:"he",dn:"he didn't"},
+  {s:"They",dp:"they",dn:"they didn't"},
+  {s:"My friend",dp:"my friend",dn:"my friend didn't"},
+];
+
+function makeSentence(v,sj){
+  const[base,past,,]=v;
+  const m={
+    go:`${sj} went to school yesterday.`,eat:`${sj} ate rice for lunch.`,
+    buy:`${sj} bought a new bag.`,write:`${sj} wrote a letter.`,
+    see:`${sj} saw a movie.`,meet:`${sj} met an old friend.`,
+    find:`${sj} found a wallet.`,lose:`${sj} lost the game.`,
+    win:`${sj} won the race.`,sing:`${sj} sang a song.`,
+    swim:`${sj} swam in the pool.`,read:`${sj} read a book.`,
+    drink:`${sj} drank some water.`,drive:`${sj} drove to the park.`,
+    take:`${sj} took the bus.`,make:`${sj} made a cake.`,
+    send:`${sj} sent an email.`,teach:`${sj} taught English.`,
+    tell:`${sj} told a story.`,bring:`${sj} brought lunch.`,
+    catch:`${sj} caught the ball.`,fall:`${sj} fell down.`,
+    give:`${sj} gave a gift.`,sleep:`${sj} slept early.`,
+    run:`${sj} ran in the park.`,fly:`${sj} flew to Japan.`,
+    draw:`${sj} drew a picture.`,ride:`${sj} rode a bike.`,
+    speak:`${sj} spoke English well.`,know:`${sj} knew the answer.`,
+    think:`${sj} thought about it.`,feel:`${sj} felt tired.`,
+    hear:`${sj} heard the news.`,sit:`${sj} sat by the window.`,
+    stand:`${sj} stood in line.`,keep:`${sj} kept the secret.`,
+    leave:`${sj} left early.`,begin:`${sj} began the project.`,
+    spend:`${sj} spent a lot of money.`,build:`${sj} built a house.`,
+    fight:`${sj} fought hard.`,hold:`${sj} held the baby.`,
+    hide:`${sj} hid behind the door.`,throw:`${sj} threw the ball.`,
+    break:`${sj} broke the window.`,choose:`${sj} chose a seat.`,
+    steal:`${sj} stole a look.`,grow:`${sj} grew vegetables.`,
+    blow:`${sj} blew out the candle.`,freeze:`${sj} froze with fear.`,
+    shoot:`${sj} shot the basket.`,wear:`${sj} wore a red dress.`,
+    pay:`${sj} paid the bill.`,say:`${sj} said hello.`,
+    sell:`${sj} sold her old phone.`,understand:`${sj} understood the question.`,
+    wake:`${sj} woke up early.`,mean:`${sj} meant it.`,
+    lead:`${sj} led the team.`,light:`${sj} lit the candle.`,
+    shine:`${sj} shone a light.`,feed:`${sj} fed the cat.`,
+    put:`${sj} put the book down.`,cut:`${sj} cut the cake.`,
+    hit:`${sj} hit the ball.`,set:`${sj} set the table.`,
+    shut:`${sj} shut the door.`,let:`${sj} let the dog out.`,
+    hurt:`${sj} hurt her leg.`,spread:`${sj} spread the news.`,
+    become:`${sj} became a doctor.`,come:`${sj} came home late.`,
+    have:`${sj} had a good time.`,get:`${sj} got a new job.`,
+    do:`${sj} did the homework.`,
+  };
+  return m[base]||`${sj} ${past} it yesterday.`;
+}
+
+const WH_TMPL={
+  What:[
+    {t:(b,p)=>`She ${p} <u>something</u> yesterday.`,q:(b,p)=>`What did she ${b} yesterday?`},
+    {t:(b,p)=>`He ${p} <u>a book</u> last night.`,q:(b,p)=>`What did he ${b} last night?`},
+    {t:(b,p)=>`They ${p} <u>lunch</u> together.`,q:(b,p)=>`What did they ${b} together?`},
+  ],
+  Who:[
+    {t:(b,p)=>`<u>Someone</u> ${p} the homework.`,q:(b,p)=>`Who ${p} the homework?`},
+    {t:(b,p)=>`<u>She</u> ${p} the letter.`,q:(b,p)=>`Who ${p} the letter?`},
+    {t:(b,p)=>`<u>My teacher</u> ${p} us a lot.`,q:(b,p)=>`Who ${p} you a lot?`},
+  ],
+  Where:[
+    {t:(b,p)=>`She ${p} <u>somewhere</u> last weekend.`,q:(b,p)=>`Where did she ${b} last weekend?`},
+    {t:(b,p)=>`He ${p} <u>to the park</u>.`,q:(b,p)=>`Where did he ${b}?`},
+    {t:(b,p)=>`They ${p} <u>at school</u>.`,q:(b,p)=>`Where did they ${b}?`},
+  ],
+  When:[
+    {t:(b,p)=>`She ${p} it <u>last Monday</u>.`,q:(b,p)=>`When did she ${b} it?`},
+    {t:(b,p)=>`He ${p} <u>yesterday morning</u>.`,q:(b,p)=>`When did he ${b}?`},
+    {t:(b,p)=>`They ${p} <u>last summer</u>.`,q:(b,p)=>`When did they ${b}?`},
+  ],
+  How:[
+    {t:(b,p)=>`She ${p} <u>quickly</u>.`,q:(b,p)=>`How did she ${b}?`},
+    {t:(b,p)=>`He ${p} it <u>carefully</u>.`,q:(b,p)=>`How did he ${b} it?`},
+    {t:(b,p)=>`They ${p} <u>together</u>.`,q:(b,p)=>`How did they ${b}?`},
+  ]
+};
+const WH_KEYS=['What','Who','Where','When','How'];
+
+function shuffle(a){let b=[...a];for(let i=b.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+
+let mode='form3',batch=[],qi=0,correct=0,wrong=0,checked=false,ynPick=null;
+
+function updateUI(){
+  document.getElementById('prog').style.width=(qi/10*100)+'%';
+  document.getElementById('progLabel').textContent=`第 ${Math.min(qi+1,10)} / 10 題`;
+  document.getElementById('scOk').textContent='✓ '+correct;
+  document.getElementById('scBad').textContent='✗ '+wrong;
+}
+
+function makeBatch(){
+  batch=shuffle(VERBS).slice(0,10);
+  qi=0;correct=0;wrong=0;checked=false;ynPick=null;
+  updateUI();render();
+}
+
+function switchMode(m){
+  mode=m;
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',['form3','yesno','wh'][i]===m);
+  });
+  makeBatch();
+}
+
+function render(){
+  if(qi>=10){renderDone();return;}
+  checked=false;ynPick=null;
+  updateUI();
+  const v=batch[qi];
+  if(mode==='form3')renderForm3(v);
+  else if(mode==='yesno')renderYN(v);
+  else renderWH(v);
+}
+
+function renderForm3(v){
+  const[base,past,pp,zh]=v;
+  const hide=Math.floor(Math.random()*3);
+  const labels=['原形 (V)','過去式 (V-ed)','過去分詞 (p.p.)'];
+  const vals=[base,past,pp];
+  let rows='';
+  for(let i=0;i<3;i++){
+    if(i===hide){
+      rows+=`<div class="input-group"><span class="input-label">${labels[i]}</span><input class="inp" id="hid" type="text" placeholder="填入答案..." data-ans="${vals[i]}" autocomplete="off" spellcheck="false"></div>`;
+    } else {
+      rows+=`<div class="input-group"><span class="input-label">${labels[i]}</span><input class="inp" type="text" value="${vals[i]}" readonly></div>`;
+    }
+  }
+  document.getElementById('content').innerHTML=`
+  <div class="card">
+    <div class="q-type">三態填空 · 第 ${qi+1} 題</div>
+    <div class="q-hint">中文提示：<b>${zh}</b></div>
+    ${rows}
+    <div class="feedback" id="fb"></div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="checkF3()">確認答案</button>
+      <button class="btn btn-ghost" onclick="revealF3()">看答案</button>
+      <button class="btn btn-primary" onclick="next()">下一題 →</button>
+    </div>
+  </div>`;
+  document.getElementById('hid').focus();
+}
+
+function checkF3(){
+  if(checked)return;
+  const inp=document.getElementById('hid');
+  const v=inp.value.trim().toLowerCase();
+  const a=inp.dataset.ans.toLowerCase().split('/')[0].trim();
+  const fb=document.getElementById('fb');
+  if(!v){fb.textContent='請先填入答案';return;}
+  if(v===a||v===inp.dataset.ans.toLowerCase()){
+    inp.classList.add('correct');fb.className='feedback ok';
+    fb.textContent='✓ 正確！';correct++;
+  } else {
+    inp.classList.add('wrong');fb.className='feedback err';
+    fb.textContent='✗ 正確答案是：'+inp.dataset.ans;wrong++;
+  }
+  checked=true;updateUI();
+}
+
+function revealF3(){
+  if(checked)return;
+  const inp=document.getElementById('hid');
+  inp.value=inp.dataset.ans;inp.classList.add('revealed');
+  const fb=document.getElementById('fb');
+  fb.className='feedback rev';fb.textContent='答案：'+inp.dataset.ans;
+  wrong++;checked=true;updateUI();
+}
+
+function renderYN(v){
+  const[base,past,,zh]=v;
+  const sj=YN_SUBJ[qi%YN_SUBJ.length];
+  const sent=makeSentence(v,sj.s);
+  const isYes=qi%2===0;
+  const words=sent.split(' ');
+  // build question: Did + subject + base + rest
+  const restWords=words.slice(2).join(' ');
+  const qAns=`Did ${sj.s.toLowerCase()} ${base} ${restWords}`;
+  const aAns=isYes?`Yes, ${sj.dp} did.`:`No, ${sj.dn}.`;
+
+  document.getElementById('content').innerHTML=`
+  <div class="card">
+    <div class="q-type">Yes / No 問句 · 第 ${qi+1} 題</div>
+    <div class="q-hint">提示：「${zh}」的過去式是 <b>${past}</b></div>
+    <div class="q-text">${sent}<br><small style="color:var(--muted);font-size:13px">▶ 改成問句，並選擇<b>${isYes?'肯定（Yes）':'否定（No）'}</b>回答</small></div>
+    <div class="input-group">
+      <span class="input-label">問句</span>
+      <input class="inp" id="qinp" type="text" placeholder="Did ... ?" data-ans="${qAns}" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="yn-row">
+      <button class="yn-btn" id="btnY" onclick="pickYN('yes','${isYes?'yes':'no'}','${aAns.replace(/'/g,"\\'")}')">Yes, ... did.</button>
+      <button class="yn-btn" id="btnN" onclick="pickYN('no','${isYes?'yes':'no'}','${aAns.replace(/'/g,"\\'")}')">No, ... didn't.</button>
+    </div>
+    <div class="feedback" id="fb"></div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="checkYN('${qAns}','${isYes?'yes':'no'}','${aAns.replace(/'/g,"\\'")}')">確認答案</button>
+      <button class="btn btn-ghost" onclick="revealYN('${qAns}','${aAns.replace(/'/g,"\\'")}')">看答案</button>
+      <button class="btn btn-primary" onclick="next()">下一題 →</button>
+    </div>
+  </div>`;
+  document.getElementById('qinp').focus();
+}
+
+function pickYN(pick,correct,ans){
+  ynPick=pick;
+  document.getElementById('btnY').className='yn-btn'+(pick==='yes'?' sel-yes':'');
+  document.getElementById('btnN').className='yn-btn'+(pick==='no'?' sel-no':'');
+}
+
+function checkYN(qAns,correctPick,fullAns){
+  if(checked)return;
+  const inp=document.getElementById('qinp');
+  const v=inp.value.trim().toLowerCase().replace(/[?？]/g,'').trim();
+  const a=qAns.toLowerCase().replace(/[?？]/g,'').trim();
+  const fb=document.getElementById('fb');
+  if(!v){fb.textContent='請先填入問句';return;}
+  if(!ynPick){fb.textContent='請選擇 Yes 或 No';return;}
+  const qOk=v===a;const ynOk=ynPick===correctPick;
+  if(qOk&&ynOk){
+    inp.classList.add('correct');
+    document.getElementById(ynPick==='yes'?'btnY':'btnN').className='yn-btn ok';
+    fb.className='feedback ok';fb.innerHTML='✓ 完全正確！完整回答：<b>'+fullAns+'</b>';
+    correct++;
+  } else {
+    if(!qOk)inp.classList.add('wrong');
+    document.getElementById(ynPick==='yes'?'btnY':'btnN').className='yn-btn err';
+    fb.className='feedback err';
+    fb.innerHTML='✗ 參考答案：<b>'+qAns+'?</b> → <b>'+fullAns+'</b>';
+    wrong++;
+  }
+  checked=true;updateUI();
+}
+
+function revealYN(qAns,fullAns){
+  if(checked)return;
+  const inp=document.getElementById('qinp');
+  inp.value=qAns+'?';inp.classList.add('revealed');
+  const fb=document.getElementById('fb');
+  fb.className='feedback rev';
+  fb.innerHTML='答案：<b>'+qAns+'?</b> → <b>'+fullAns+'</b>';
+  wrong++;checked=true;updateUI();
+}
+
+function renderWH(v){
+  const[base,past,,zh]=v;
+  const wk=WH_KEYS[qi%WH_KEYS.length];
+  const pool=WH_TMPL[wk];
+  const tmpl=pool[Math.floor(Math.random()*pool.length)];
+  const sent=tmpl.t(base,past);
+  const qAns=tmpl.q(base,past);
+
+  document.getElementById('content').innerHTML=`
+  <div class="card">
+    <div class="q-type">WH 問句 · 第 ${qi+1} 題</div>
+    <div class="q-hint">提示：「${zh}」的過去式是 <b>${past}</b>　▶ 針對<u>底線</u>部分造 <b>${wk}</b> 問句</div>
+    <div class="q-text">${sent}</div>
+    <div class="input-group">
+      <span class="input-label">問句</span>
+      <input class="inp" id="whinp" type="text" placeholder="${wk} ... ?" data-ans="${qAns}" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="feedback" id="fb"></div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="checkWH()">確認答案</button>
+      <button class="btn btn-ghost" onclick="revealWH()">看答案</button>
+      <button class="btn btn-primary" onclick="next()">下一題 →</button>
+    </div>
+  </div>`;
+  document.getElementById('whinp').focus();
+}
+
+function checkWH(){
+  if(checked)return;
+  const inp=document.getElementById('whinp');
+  const v=inp.value.trim().toLowerCase().replace(/[?？]/g,'').trim();
+  const a=inp.dataset.ans.toLowerCase().replace(/[?？]/g,'').trim();
+  const fb=document.getElementById('fb');
+  if(!v){fb.textContent='請先填入問句';return;}
+  if(v===a){
+    inp.classList.add('correct');fb.className='feedback ok';fb.textContent='✓ 正確！';correct++;
+  } else {
+    inp.classList.add('wrong');fb.className='feedback err';
+    fb.innerHTML='✗ 參考答案：<b>'+inp.dataset.ans+'</b>';wrong++;
+  }
+  checked=true;updateUI();
+}
+
+function revealWH(){
+  if(checked)return;
+  const inp=document.getElementById('whinp');
+  inp.value=inp.dataset.ans;inp.classList.add('revealed');
+  const fb=document.getElementById('fb');
+  fb.className='feedback rev';fb.innerHTML='答案：<b>'+inp.dataset.ans+'</b>';
+  wrong++;checked=true;updateUI();
+}
+
+function next(){
+  qi++;checked=false;ynPick=null;render();
+}
+
+function renderDone(){
+  const pct=Math.round(correct/10*100);
+  const msg=pct>=90?'太棒了！滿分在望 🎉':pct>=70?'做得好！繼續加油 👍':pct>=50?'還不錯，多練習幾次吧！':'繼續練習，你會進步的！';
+  document.getElementById('content').innerHTML=`
+  <div class="complete">
+    <div class="big-score">${correct}<span style="font-size:28px;color:var(--muted)">/10</span></div>
+    <div class="result-msg">${msg}（答對率 ${pct}%）</div>
+    <button class="btn-restart" onclick="makeBatch()">再練一組</button>
+  </div>`;
+  document.getElementById('prog').style.width='100%';
+  document.getElementById('progLabel').textContent='完成！';
+}
+
+makeBatch();
+</script>
+</body>
+</html>
